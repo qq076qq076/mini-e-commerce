@@ -22,7 +22,8 @@ describe('App product list', () => {
       }
     ]
     const mockState: RootState = {
-      products: mockProducts
+      products: mockProducts,
+      cartItems: []
     }
     const localVue: ReturnType<typeof createLocalVue> = createLocalVue()
 

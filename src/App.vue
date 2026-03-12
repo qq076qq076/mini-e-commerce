@@ -14,7 +14,12 @@
         <a href="#bundle">組合推薦</a>
         <a href="#faq">Q&amp;A</a>
       </nav>
-      <button class="nav-cta" type="button">立即逛逛</button>
+      <button class="cart-button" data-test="cart-button" type="button" aria-label="購物車">
+        <span class="cart-icon" aria-hidden="true">🛒</span>
+        <span v-if="cartItemCount > 0" class="cart-count" data-test="cart-count">
+          {{ cartItemCount }}
+        </span>
+      </button>
     </header>
 
     <main>
@@ -69,7 +74,12 @@
           <p>每款商品皆提供透明規格與價格，協助你快速做出最適合的選擇。</p>
         </div>
         <div class="product-grid">
-          <ProductCard v-for="product in products" :key="product.id" :product="product" />
+          <ProductCard
+            v-for="product in products"
+            :key="product.id"
+            :product="product"
+            @select-product="openProductDialog"
+          />
         </div>
       </section>
 
@@ -100,6 +110,14 @@
       </section>
     </main>
 
+    <ProductDetailDialog
+      :visible="isDialogVisible"
+      :product="selectedProduct"
+      @close="closeProductDialog"
+      @add-to-cart="addProductToCart"
+    />
+    <AppToast :visible="isToastVisible" :message="toastMessage" />
+
     <footer class="footer">
       <p>Nexus Gear © 2026</p>
       <p>打造更聰明的 3C 消費體驗</p>
@@ -109,9 +127,22 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import AppToast from '@/components/AppToast.vue'
 import ProductCard from '@/components/ProductCard.vue'
+import ProductDetailDialog from '@/components/ProductDetailDialog.vue'
 import { Product } from '@/types/product'
 import { RootState } from '@/store'
+import { AddToCartPayload, CartItem } from '@/types/cart'
+
+const TOAST_DURATION_MS: number = 2500
+
+interface AppData {
+  selectedProduct: Product | null
+  isDialogVisible: boolean
+  isToastVisible: boolean
+  toastMessage: string
+  toastTimerId: number | null
+}
 
 interface HighlightItem {
   title: string
@@ -156,7 +187,18 @@ const FAQ_ITEMS: FaqItem[] = [
 export default Vue.extend({
   name: 'App',
   components: {
-    ProductCard
+    AppToast,
+    ProductCard,
+    ProductDetailDialog
+  },
+  data(): AppData {
+    return {
+      selectedProduct: null,
+      isDialogVisible: false,
+      isToastVisible: false,
+      toastMessage: '',
+      toastTimerId: null
+    }
   },
   computed: {
     products(): Product[] {
@@ -169,6 +211,12 @@ export default Vue.extend({
 
       return products.length > 0 ? products[0] : null
     },
+    cartItemCount(): number {
+      const rootState: RootState = this.$store.state as RootState
+      const cartItems: CartItem[] = rootState.cartItems
+
+      return cartItems.reduce((total: number, item: CartItem): number => total + item.quantity, 0)
+    },
     highlightItems(): HighlightItem[] {
       return HIGHLIGHT_ITEMS
     },
@@ -176,7 +224,46 @@ export default Vue.extend({
       return FAQ_ITEMS
     }
   },
+  beforeDestroy(): void {
+    if (this.toastTimerId !== null) {
+      window.clearTimeout(this.toastTimerId)
+      this.toastTimerId = null
+    }
+  },
   methods: {
+    openProductDialog(product: Product): void {
+      this.selectedProduct = product
+      this.isDialogVisible = true
+    },
+    closeProductDialog(): void {
+      this.isDialogVisible = false
+    },
+    getProductTitleById(productId: string): string {
+      const product: Product | undefined = this.products.find(
+        (item: Product): boolean => item.id === productId
+      )
+
+      return product ? product.title : '商品'
+    },
+    showToast(message: string): void {
+      if (this.toastTimerId !== null) {
+        window.clearTimeout(this.toastTimerId)
+      }
+
+      this.toastMessage = message
+      this.isToastVisible = true
+      this.toastTimerId = window.setTimeout((): void => {
+        this.isToastVisible = false
+        this.toastTimerId = null
+      }, TOAST_DURATION_MS)
+    },
+    addProductToCart(payload: AddToCartPayload): void {
+      const productTitle: string = this.getProductTitleById(payload.productId)
+
+      this.$store.commit('ADD_TO_CART', payload)
+      this.closeProductDialog()
+      this.showToast(`成功將 ${productTitle} 加入購物車`)
+    },
     formatPrice(price: number): string {
       return `NT$ ${price}`
     }
@@ -300,19 +387,44 @@ main,
   color: var(--text-main);
 }
 
-.nav-cta {
+.cart-button {
+  position: relative;
   border: none;
-  border-radius: 10px;
-  padding: 10px 14px;
+  border-radius: 12px;
+  width: 46px;
+  height: 46px;
   color: #ffffff;
-  font-weight: 600;
+  font-size: 22px;
   background: var(--primary);
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.nav-cta:hover {
+.cart-button:hover {
   background: var(--primary-strong);
+}
+
+.cart-icon {
+  display: inline-block;
+  transform: translateY(1px);
+}
+
+.cart-count {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  padding: 0 6px;
+  color: #10315a;
+  font-size: 12px;
+  font-weight: 700;
+  background: #f9d853;
+  box-shadow: 0 0 0 2px #ffffff;
 }
 
 .hero {

@@ -1,5 +1,13 @@
 <template>
-  <article class="product-card" data-test="product-card">
+  <article
+    class="product-card"
+    data-test="product-card"
+    role="button"
+    tabindex="0"
+    @click="onSelectProduct"
+    @keydown.enter="onSelectProduct"
+    @keydown.space.prevent="onSelectProduct"
+  >
     <div class="product-image-wrapper">
       <img
         :src="product.image"
@@ -12,7 +20,7 @@
       <p class="product-id" data-test="product-id">{{ product.id }}</p>
       <h3 class="product-title" data-test="product-title">{{ product.title }}</h3>
       <p class="product-price" data-test="product-price">{{ formatPrice(product.price) }}</p>
-      <button class="product-cta" type="button">查看詳情</button>
+      <button class="product-cta" type="button" @click.stop="onSelectProduct">查看詳情</button>
     </div>
   </article>
 </template>
@@ -30,6 +38,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    onSelectProduct(): void {
+      this.$emit('select-product', this.product)
+    },
     formatPrice(price: number): string {
       return `NT$ ${price}`
     }
@@ -43,6 +54,7 @@ export default Vue.extend({
   border: 1px solid var(--line-color);
   border-radius: 14px;
   background: var(--bg-surface);
+  cursor: pointer;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;

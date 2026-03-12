@@ -1,23 +1,61 @@
 import Vue from 'vue'
-import Vuex, { StoreOptions } from 'vuex'
+import Vuex, { Store, StoreOptions } from 'vuex'
 import productsData from '@/data/products'
 import { Product } from '@/types/product'
+import { AddToCartPayload, CartItem } from '@/types/cart'
 
 Vue.use(Vuex)
 
 export interface RootState {
   products: Product[]
+  cartItems: CartItem[]
 }
 
-const state: RootState = {
-  products: productsData
+const createState = (): RootState => {
+  const products: Product[] = productsData.map((product: Product): Product => ({ ...product }))
+
+  return {
+    products,
+    cartItems: []
+  }
 }
 
 const storeOptions: StoreOptions<RootState> = {
-  state,
-  mutations: {},
+  state: createState(),
+  mutations: {
+    ADD_TO_CART(state: RootState, payload: AddToCartPayload): void {
+      if (payload.quantity <= 0) {
+        return
+      }
+
+      const existingItem: CartItem | undefined = state.cartItems.find(
+        (item: CartItem): boolean => item.productId === payload.productId
+      )
+
+      if (existingItem) {
+        existingItem.quantity += payload.quantity
+        return
+      }
+
+      const newItem: CartItem = {
+        productId: payload.productId,
+        quantity: payload.quantity
+      }
+
+      state.cartItems.push(newItem)
+    }
+  },
   actions: {},
   modules: {}
 }
 
-export default new Vuex.Store<RootState>(storeOptions)
+export const createStore = (): Store<RootState> => {
+  const options: StoreOptions<RootState> = {
+    ...storeOptions,
+    state: createState()
+  }
+
+  return new Vuex.Store<RootState>(options)
+}
+
+export default createStore()
