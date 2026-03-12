@@ -21,14 +21,14 @@
               </p>
               <div class="item-quantity-row">
                 <label class="item-quantity-label" :for="`cart-qty-${item.productId}`">數量：</label>
-                <input
+                <NumberStepperInput
                   :id="`cart-qty-${item.productId}`"
                   class="item-quantity-input"
-                  data-test="cart-item-quantity-input"
-                  type="number"
-                  min="1"
                   :value="item.quantity"
-                  @change="updateQuantity(item.productId, $event)"
+                  :min="1"
+                  :step="1"
+                  input-data-test="cart-item-quantity-input"
+                  @input="updateQuantity(item.productId, $event)"
                 />
               </div>
               <p>
@@ -59,10 +59,14 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import NumberStepperInput from '@/components/NumberStepperInput.vue'
 import { CartPreviewItem } from '@/types/cart'
 
 export default Vue.extend({
   name: 'CartPreview',
+  components: {
+    NumberStepperInput
+  },
   props: {
     visible: {
       type: Boolean,
@@ -78,22 +82,10 @@ export default Vue.extend({
     }
   },
   methods: {
-    getCurrentQuantity(productId: string): number {
-      const existingItem: CartPreviewItem | undefined = this.items.find(
-        (item: CartPreviewItem): boolean => item.productId === productId
-      )
-
-      return existingItem ? existingItem.quantity : 1
-    },
-    updateQuantity(productId: string, event: Event): void {
-      const inputElement: HTMLInputElement | null = event.target as HTMLInputElement | null
-      const parsedQuantity: number = Number(inputElement ? inputElement.value : '')
+    updateQuantity(productId: string, quantityValue: number): void {
+      const parsedQuantity: number = Number(quantityValue)
 
       if (!Number.isInteger(parsedQuantity) || parsedQuantity <= 0) {
-        if (inputElement) {
-          inputElement.value = this.getCurrentQuantity(productId).toString()
-        }
-
         return
       }
 
@@ -191,12 +183,7 @@ export default Vue.extend({
 }
 
 .item-quantity-input {
-  width: 76px;
-  border: 1px solid #cfdbeb;
-  border-radius: 8px;
-  padding: 4px 8px;
-  color: #1f2c40;
-  font-size: 13px;
+  width: 134px;
 }
 
 .remove-item-btn {

@@ -13,14 +13,14 @@
       <p class="dialog-price">{{ formatPrice(product.price) }}</p>
 
       <label class="quantity-label" for="quantity-input">購買數量（必填）</label>
-      <input
+      <NumberStepperInput
         id="quantity-input"
         v-model="quantityInput"
-        data-test="quantity-input"
         class="quantity-input"
-        type="number"
-        min="1"
-        required
+        input-data-test="quantity-input"
+        :min="1"
+        :step="1"
+        :required="true"
       />
       <p v-if="validationMessage" class="validation-message">{{ validationMessage }}</p>
 
@@ -33,15 +33,19 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import NumberStepperInput from '@/components/NumberStepperInput.vue'
 import { Product } from '@/types/product'
 
 interface ProductDetailDialogData {
-  quantityInput: string
+  quantityInput: number
   validationMessage: string
 }
 
 export default Vue.extend({
   name: 'ProductDetailDialog',
+  components: {
+    NumberStepperInput
+  },
   props: {
     visible: {
       type: Boolean,
@@ -54,7 +58,7 @@ export default Vue.extend({
   },
   data(): ProductDetailDialogData {
     return {
-      quantityInput: '1',
+      quantityInput: 1,
       validationMessage: ''
     }
   },
@@ -70,7 +74,7 @@ export default Vue.extend({
   },
   methods: {
     resetInput(): void {
-      this.quantityInput = '1'
+      this.quantityInput = 1
       this.validationMessage = ''
     },
     closeDialog(): void {
@@ -177,11 +181,6 @@ export default Vue.extend({
 
 .quantity-input {
   margin-top: 6px;
-  width: 100%;
-  border: 1px solid #cfdbeb;
-  border-radius: 10px;
-  padding: 10px 12px;
-  font-size: 16px;
 }
 
 .validation-message {
