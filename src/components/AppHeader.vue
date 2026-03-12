@@ -8,7 +8,6 @@
       <nav class="menu">
         <a href="#products">商品</a>
         <a href="#highlights">特色</a>
-        <a href="#bundle">組合推薦</a>
         <a href="#faq">Q&amp;A</a>
       </nav>
       <div class="cart-wrapper">

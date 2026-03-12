@@ -22,10 +22,6 @@
             從行動續航到桌面效率，我們專注挑選實用、耐用、兼具設計感的 3C 裝備，
             幫你一次配齊高頻使用情境。
           </p>
-          <div class="hero-actions">
-            <a class="primary-btn" href="#products">開始選購</a>
-            <a class="secondary-btn" href="#bundle">查看本週組合</a>
-          </div>
           <div class="hero-metrics">
             <article class="metric">
               <p class="metric-value">24H</p>
@@ -72,21 +68,6 @@
             @select-product="openProductDialog"
           />
         </div>
-      </section>
-
-      <section id="bundle" class="bundle">
-        <div>
-          <p class="section-tag">Smart Bundle</p>
-          <h2>桌面升級組合提案</h2>
-          <p class="bundle-text">
-            組合購買可享加價購折扣，推薦給內容創作者、遠端工作者與重度遊戲玩家。
-          </p>
-        </div>
-        <ul class="bundle-list">
-          <li>效能工作組：機械式鍵盤 + 人體工學滑鼠</li>
-          <li>通勤續航組：磁吸行動電源 + 無線藍牙耳機</li>
-          <li>進階玩家組：桌面週邊任兩件 88 折</li>
-        </ul>
       </section>
 
       <section id="faq" class="faq">
@@ -424,42 +405,6 @@ main,
   line-height: 1.65;
 }
 
-.hero-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.primary-btn,
-.secondary-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.primary-btn {
-  color: #ffffff;
-  background: var(--primary);
-}
-
-.primary-btn:hover {
-  background: var(--primary-strong);
-}
-
-.secondary-btn {
-  border: 1px solid var(--line-color);
-  color: var(--text-main);
-  background: var(--bg-surface);
-}
-
-.secondary-btn:hover {
-  background: var(--bg-soft);
-}
-
 .hero-metrics {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -589,39 +534,6 @@ main,
   margin-top: 16px;
 }
 
-.bundle {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 16px;
-  margin-bottom: 22px;
-  padding: 20px;
-  border: 1px solid var(--line-color);
-  border-radius: 16px;
-  background: linear-gradient(110deg, #f9fcff 0%, #eef8f5 100%);
-}
-
-.bundle h2 {
-  margin: 8px 0 0;
-  font-size: 32px;
-  font-family: 'Chakra Petch', sans-serif;
-}
-
-.bundle-text {
-  margin: 10px 0 0;
-  color: var(--text-muted);
-}
-
-.bundle-list {
-  margin: 0;
-  padding-left: 20px;
-}
-
-.bundle-list li {
-  margin-bottom: 12px;
-  color: #27415f;
-  line-height: 1.5;
-}
-
 .faq {
   margin-bottom: 22px;
 }
@@ -657,8 +569,7 @@ main,
 
 @media (max-width: 960px) {
   .hero,
-  .highlights,
-  .bundle {
+  .highlights {
     grid-template-columns: 1fr;
   }
 
@@ -666,8 +577,7 @@ main,
     font-size: 34px;
   }
 
-  .section-head h2,
-  .bundle h2 {
+  .section-head h2 {
     font-size: 28px;
   }
 
