@@ -16,6 +16,12 @@ export interface RootState {
   cartItems: CartItem[]
 }
 
+export enum MutationType {
+  ADD_TO_CART = 'ADD_TO_CART',
+  UPDATE_CART_ITEM_QUANTITY = 'UPDATE_CART_ITEM_QUANTITY',
+  REMOVE_FROM_CART = 'REMOVE_FROM_CART'
+}
+
 const createState = (): RootState => {
   const products: Product[] = productsData.map((product: Product): Product => ({ ...product }))
 
@@ -28,7 +34,7 @@ const createState = (): RootState => {
 const storeOptions: StoreOptions<RootState> = {
   state: createState(),
   mutations: {
-    ADD_TO_CART(state: RootState, payload: AddToCartPayload): void {
+    [MutationType.ADD_TO_CART](state: RootState, payload: AddToCartPayload): void {
       if (payload.quantity <= 0) {
         return
       }
@@ -49,7 +55,10 @@ const storeOptions: StoreOptions<RootState> = {
 
       state.cartItems.push(newItem)
     },
-    UPDATE_CART_ITEM_QUANTITY(state: RootState, payload: UpdateCartItemQuantityPayload): void {
+    [MutationType.UPDATE_CART_ITEM_QUANTITY](
+      state: RootState,
+      payload: UpdateCartItemQuantityPayload
+    ): void {
       if (payload.quantity <= 0) {
         return
       }
@@ -64,7 +73,7 @@ const storeOptions: StoreOptions<RootState> = {
 
       existingItem.quantity = payload.quantity
     },
-    REMOVE_FROM_CART(state: RootState, payload: RemoveFromCartPayload): void {
+    [MutationType.REMOVE_FROM_CART](state: RootState, payload: RemoveFromCartPayload): void {
       state.cartItems = state.cartItems.filter(
         (item: CartItem): boolean => item.productId !== payload.productId
       )
