@@ -1,5 +1,8 @@
 # mini-e-commerce
 
+## DEMO PAGE
+[https://qq076qq076.github.io/mini-e-commerce/](https://qq076qq076.github.io/mini-e-commerce/)
+
 ## 核心功能
 
 1. 商品清單：需包含 `id`、`title`、`price`、`image`。
