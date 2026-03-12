@@ -88,6 +88,33 @@ npm run format
 npm run format:check
 ```
 
+## Deploy 到 GitHub Pages
+
+1. 先確認遠端 repo 已建立且已 push 到 GitHub。
+2. 在專案根目錄執行：
+
+```bash
+npm run deploy:gh-pages
+```
+
+3. 到 GitHub Repository `Settings -> Pages`，將來源設定為 `gh-pages` branch（`/root`）。
+4. 等待部署完成後，網址通常為：
+   - `https://<github-username>.github.io/<repo-name>/`
+
+### 可選參數
+
+1. 若 repository 名稱不是 `package.json` 的 `name`，可指定：
+
+```bash
+GH_PAGES_REPO=<your-repo-name> npm run deploy:gh-pages
+```
+
+2. 若要覆蓋完整 public path（例如 user/organization page），可指定：
+
+```bash
+GH_PAGES_PUBLIC_PATH=/ npm run deploy:gh-pages
+```
+
 ### Customize configuration
 
 See [Configuration Reference](https://cli.vuejs.org/config/).
