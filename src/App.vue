@@ -69,29 +69,7 @@
           <p>每款商品皆提供透明規格與價格，協助你快速做出最適合的選擇。</p>
         </div>
         <div class="product-grid">
-          <article
-            v-for="product in products"
-            :key="product.id"
-            class="product-card"
-            data-test="product-card"
-          >
-            <div class="product-image-wrapper">
-              <img
-                :src="product.image"
-                :alt="product.title"
-                class="product-image"
-                data-test="product-image"
-              />
-            </div>
-            <div class="product-content">
-              <p class="product-id" data-test="product-id">{{ product.id }}</p>
-              <h3 class="product-title" data-test="product-title">{{ product.title }}</h3>
-              <p class="product-price" data-test="product-price">
-                {{ formatPrice(product.price) }}
-              </p>
-              <button class="product-cta" type="button">查看詳情</button>
-            </div>
-          </article>
+          <ProductCard v-for="product in products" :key="product.id" :product="product" />
         </div>
       </section>
 
@@ -131,6 +109,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import ProductCard from '@/components/ProductCard.vue'
 import { Product } from '@/types/product'
 import { RootState } from '@/store'
 
@@ -176,6 +155,9 @@ const FAQ_ITEMS: FaqItem[] = [
 
 export default Vue.extend({
   name: 'App',
+  components: {
+    ProductCard
+  },
   computed: {
     products(): Product[] {
       const rootState: RootState = this.$store.state as RootState
