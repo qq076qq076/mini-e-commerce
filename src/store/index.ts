@@ -2,7 +2,12 @@ import Vue from 'vue'
 import Vuex, { Store, StoreOptions } from 'vuex'
 import productsData from '@/data/products'
 import { Product } from '@/types/product'
-import { AddToCartPayload, CartItem } from '@/types/cart'
+import {
+  AddToCartPayload,
+  CartItem,
+  RemoveFromCartPayload,
+  UpdateCartItemQuantityPayload
+} from '@/types/cart'
 
 Vue.use(Vuex)
 
@@ -43,6 +48,26 @@ const storeOptions: StoreOptions<RootState> = {
       }
 
       state.cartItems.push(newItem)
+    },
+    UPDATE_CART_ITEM_QUANTITY(state: RootState, payload: UpdateCartItemQuantityPayload): void {
+      if (payload.quantity <= 0) {
+        return
+      }
+
+      const existingItem: CartItem | undefined = state.cartItems.find(
+        (item: CartItem): boolean => item.productId === payload.productId
+      )
+
+      if (!existingItem) {
+        return
+      }
+
+      existingItem.quantity = payload.quantity
+    },
+    REMOVE_FROM_CART(state: RootState, payload: RemoveFromCartPayload): void {
+      state.cartItems = state.cartItems.filter(
+        (item: CartItem): boolean => item.productId !== payload.productId
+      )
     }
   },
   actions: {},

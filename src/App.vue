@@ -3,24 +3,15 @@
     <div class="ambient-shape ambient-shape-left"></div>
     <div class="ambient-shape ambient-shape-right"></div>
 
-    <header class="top-nav">
-      <a class="brand" href="#home">
-        <span class="brand-mark">NG</span>
-        <span class="brand-name">Nexus Gear</span>
-      </a>
-      <nav class="menu">
-        <a href="#products">商品</a>
-        <a href="#highlights">特色</a>
-        <a href="#bundle">組合推薦</a>
-        <a href="#faq">Q&amp;A</a>
-      </nav>
-      <button class="cart-button" data-test="cart-button" type="button" aria-label="購物車">
-        <span class="cart-icon" aria-hidden="true">🛒</span>
-        <span v-if="cartItemCount > 0" class="cart-count" data-test="cart-count">
-          {{ cartItemCount }}
-        </span>
-      </button>
-    </header>
+    <AppHeader
+      :cart-item-count="cartItemCount"
+      :cart-preview-items="cartPreviewItems"
+      :cart-total-amount="cartTotalAmount"
+      :is-cart-preview-visible="isCartPreviewVisible"
+      @toggle-cart-preview="toggleCartPreview"
+      @update-cart-item-quantity="updateCartItemQuantity"
+      @remove-cart-item="removeCartItem"
+    />
 
     <main>
       <section id="home" class="hero">
@@ -127,18 +118,26 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import AppHeader from '@/components/AppHeader.vue'
 import AppToast from '@/components/AppToast.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import ProductDetailDialog from '@/components/ProductDetailDialog.vue'
 import { Product } from '@/types/product'
 import { RootState } from '@/store'
-import { AddToCartPayload, CartItem } from '@/types/cart'
+import {
+  AddToCartPayload,
+  CartItem,
+  CartPreviewItem,
+  RemoveFromCartPayload,
+  UpdateCartItemQuantityPayload
+} from '@/types/cart'
 
 const TOAST_DURATION_MS: number = 2500
 
 interface AppData {
   selectedProduct: Product | null
   isDialogVisible: boolean
+  isCartPreviewVisible: boolean
   isToastVisible: boolean
   toastMessage: string
   toastTimerId: number | null
@@ -187,6 +186,7 @@ const FAQ_ITEMS: FaqItem[] = [
 export default Vue.extend({
   name: 'App',
   components: {
+    AppHeader,
     AppToast,
     ProductCard,
     ProductDetailDialog
@@ -195,6 +195,7 @@ export default Vue.extend({
     return {
       selectedProduct: null,
       isDialogVisible: false,
+      isCartPreviewVisible: false,
       isToastVisible: false,
       toastMessage: '',
       toastTimerId: null
@@ -217,6 +218,35 @@ export default Vue.extend({
 
       return cartItems.reduce((total: number, item: CartItem): number => total + item.quantity, 0)
     },
+    cartPreviewItems(): CartPreviewItem[] {
+      const rootState: RootState = this.$store.state as RootState
+      const cartItems: CartItem[] = rootState.cartItems
+
+      return cartItems.map((cartItem: CartItem): CartPreviewItem => {
+        const product: Product | undefined = this.products.find(
+          (item: Product): boolean => item.id === cartItem.productId
+        )
+        const title: string = product ? product.title : '未知商品'
+        const price: number = product ? product.price : 0
+        const subtotal: number = price * cartItem.quantity
+
+        return {
+          productId: cartItem.productId,
+          title,
+          price,
+          quantity: cartItem.quantity,
+          subtotal
+        }
+      })
+    },
+    cartTotalAmount(): number {
+      const previewItems: CartPreviewItem[] = this.cartPreviewItems
+
+      return previewItems.reduce(
+        (total: number, previewItem: CartPreviewItem): number => total + previewItem.subtotal,
+        0
+      )
+    },
     highlightItems(): HighlightItem[] {
       return HIGHLIGHT_ITEMS
     },
@@ -237,6 +267,9 @@ export default Vue.extend({
     },
     closeProductDialog(): void {
       this.isDialogVisible = false
+    },
+    toggleCartPreview(): void {
+      this.isCartPreviewVisible = !this.isCartPreviewVisible
     },
     getProductTitleById(productId: string): string {
       const product: Product | undefined = this.products.find(
@@ -264,6 +297,18 @@ export default Vue.extend({
       this.closeProductDialog()
       this.showToast(`成功將 ${productTitle} 加入購物車`)
     },
+    updateCartItemQuantity(payload: UpdateCartItemQuantityPayload): void {
+      const productTitle: string = this.getProductTitleById(payload.productId)
+
+      this.$store.commit('UPDATE_CART_ITEM_QUANTITY', payload)
+      this.showToast(`已更新 ${productTitle} 數量為 ${payload.quantity}`)
+    },
+    removeCartItem(payload: RemoveFromCartPayload): void {
+      const productTitle: string = this.getProductTitleById(payload.productId)
+
+      this.$store.commit('REMOVE_FROM_CART', payload)
+      this.showToast(`已從購物車移除 ${productTitle}`)
+    },
     formatPrice(price: number): string {
       return `NT$ ${price}`
     }
@@ -274,7 +319,8 @@ export default Vue.extend({
 <style lang="scss">
 @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap');
 
-html {
+html,
+body {
   scroll-behavior: smooth;
 }
 
@@ -288,15 +334,16 @@ html {
   --primary: #1a78ff;
   --primary-strong: #0b57c1;
   --accent: #0db17f;
+  --app-side-padding: 20px;
   position: relative;
-  overflow: hidden;
-  padding: 20px 20px 48px;
+  padding: var(--app-side-padding) var(--app-side-padding) 48px;
   min-height: 100vh;
   color: var(--text-main);
   background:
     radial-gradient(circle at 10% 10%, #dceaff 0%, rgba(220, 234, 255, 0) 40%),
     radial-gradient(circle at 90% 0%, #daf8ef 0%, rgba(218, 248, 239, 0) 34%), var(--bg-main);
   font-family: 'Noto Sans TC', sans-serif;
+  overflow: hidden;
 }
 
 .ambient-shape {
@@ -323,108 +370,12 @@ html {
   background: rgba(13, 177, 127, 0.2);
 }
 
-.top-nav,
 main,
 .footer {
   position: relative;
   z-index: 1;
   max-width: 1120px;
   margin: 0 auto;
-}
-
-.top-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-  padding: 14px 16px;
-  border: 1px solid var(--line-color);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.84);
-  backdrop-filter: blur(6px);
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: inherit;
-  text-decoration: none;
-}
-
-.brand-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  color: #ffffff;
-  font-family: 'Chakra Petch', sans-serif;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-}
-
-.brand-name {
-  font-family: 'Chakra Petch', sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-.menu {
-  display: flex;
-  gap: 16px;
-}
-
-.menu a {
-  color: var(--text-muted);
-  font-size: 14px;
-  text-decoration: none;
-}
-
-.menu a:hover {
-  color: var(--text-main);
-}
-
-.cart-button {
-  position: relative;
-  border: none;
-  border-radius: 12px;
-  width: 46px;
-  height: 46px;
-  color: #ffffff;
-  font-size: 22px;
-  background: var(--primary);
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.cart-button:hover {
-  background: var(--primary-strong);
-}
-
-.cart-icon {
-  display: inline-block;
-  transform: translateY(1px);
-}
-
-.cart-count {
-  position: absolute;
-  top: -7px;
-  right: -7px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  padding: 0 6px;
-  color: #10315a;
-  font-size: 12px;
-  font-weight: 700;
-  background: #f9d853;
-  box-shadow: 0 0 0 2px #ffffff;
 }
 
 .hero {
@@ -705,17 +656,6 @@ main,
 }
 
 @media (max-width: 960px) {
-  .top-nav {
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .menu {
-    order: 3;
-    width: 100%;
-    justify-content: space-between;
-  }
-
   .hero,
   .highlights,
   .bundle {
@@ -739,7 +679,8 @@ main,
 
 @media (max-width: 620px) {
   #app {
-    padding: 14px 14px 30px;
+    --app-side-padding: 14px;
+    padding: var(--app-side-padding) var(--app-side-padding) 30px;
   }
 
   .hero-copy {
@@ -752,10 +693,6 @@ main,
 
   .hero-metrics {
     grid-template-columns: 1fr;
-  }
-
-  .menu a {
-    font-size: 13px;
   }
 }
 </style>
