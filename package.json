@@ -8,13 +8,15 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
-    "vue": "^2.6.11",
-    "vuex": "^3.4.0"
+    "vue": "2.6.14",
+    "vuex": "3.6.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.19",
     "@vue/cli-plugin-vuex": "~4.5.19",
     "@vue/cli-service": "~4.5.19",
-    "vue-template-compiler": "^2.6.11"
+    "sass": "1.98.0",
+    "sass-loader": "10.5.2",
+    "vue-template-compiler": "2.6.14"
   }
 }

@@ -1,0 +1,14 @@
+$color-text: #2c3e50;
+$color-bg: #f7f9fc;
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: $color-bg;
+  color: $color-text;
+}
