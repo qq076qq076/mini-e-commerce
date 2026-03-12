@@ -104,10 +104,9 @@ import AppToast from '@/components/AppToast.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import ProductDetailDialog from '@/components/ProductDetailDialog.vue'
 import { Product } from '@/types/product'
-import { MutationType, RootState } from '@/store'
+import { GetterType, MutationType, RootGetters, RootState } from '@/store'
 import {
   AddToCartPayload,
-  CartItem,
   CartPreviewItem,
   RemoveFromCartPayload,
   UpdateCartItemQuantityPayload
@@ -194,39 +193,19 @@ export default Vue.extend({
       return products.length > 0 ? products[0] : null
     },
     cartItemCount(): number {
-      const rootState: RootState = this.$store.state as RootState
-      const cartItems: CartItem[] = rootState.cartItems
+      const rootGetters: RootGetters = this.$store.getters as RootGetters
 
-      return cartItems.reduce((total: number, item: CartItem): number => total + item.quantity, 0)
+      return rootGetters[GetterType.CART_ITEM_COUNT]
     },
     cartPreviewItems(): CartPreviewItem[] {
-      const rootState: RootState = this.$store.state as RootState
-      const cartItems: CartItem[] = rootState.cartItems
+      const rootGetters: RootGetters = this.$store.getters as RootGetters
 
-      return cartItems.map((cartItem: CartItem): CartPreviewItem => {
-        const product: Product | undefined = this.products.find(
-          (item: Product): boolean => item.id === cartItem.productId
-        )
-        const title: string = product ? product.title : '未知商品'
-        const price: number = product ? product.price : 0
-        const subtotal: number = price * cartItem.quantity
-
-        return {
-          productId: cartItem.productId,
-          title,
-          price,
-          quantity: cartItem.quantity,
-          subtotal
-        }
-      })
+      return rootGetters[GetterType.CART_PREVIEW_ITEMS]
     },
     cartTotalAmount(): number {
-      const previewItems: CartPreviewItem[] = this.cartPreviewItems
+      const rootGetters: RootGetters = this.$store.getters as RootGetters
 
-      return previewItems.reduce(
-        (total: number, previewItem: CartPreviewItem): number => total + previewItem.subtotal,
-        0
-      )
+      return rootGetters[GetterType.CART_TOTAL_AMOUNT]
     },
     highlightItems(): HighlightItem[] {
       return HIGHLIGHT_ITEMS

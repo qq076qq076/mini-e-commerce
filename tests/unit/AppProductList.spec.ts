@@ -2,8 +2,9 @@ import Vue from 'vue'
 import Vuex, { Store } from 'vuex'
 import { createLocalVue, mount, Wrapper, WrapperArray } from '@vue/test-utils'
 import App from '@/App.vue'
+import { CartPreviewItem } from '@/types/cart'
 import { Product } from '@/types/product'
-import { RootState } from '@/store'
+import { GetterType, RootState } from '@/store'
 
 describe('App product list', () => {
   it('renders product id, title, price and image', () => {
@@ -30,7 +31,12 @@ describe('App product list', () => {
     localVue.use(Vuex)
 
     const store: Store<RootState> = new Vuex.Store<RootState>({
-      state: mockState
+      state: mockState,
+      getters: {
+        [GetterType.CART_ITEM_COUNT]: (): number => 0,
+        [GetterType.CART_PREVIEW_ITEMS]: (): CartPreviewItem[] => [],
+        [GetterType.CART_TOTAL_AMOUNT]: (): number => 0
+      }
     })
     const wrapper: Wrapper<Vue> = mount(App, {
       localVue,
