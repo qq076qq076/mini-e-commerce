@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Vuex, { Store, StoreOptions } from 'vuex'
+import Vuex, { ActionContext, Store, StoreOptions } from 'vuex'
 import { Product } from '@/types/product'
 import {
   AddToCartPayload,
@@ -33,6 +33,12 @@ export enum MutationType {
   ADD_TO_CART = 'ADD_TO_CART',
   UPDATE_CART_ITEM_QUANTITY = 'UPDATE_CART_ITEM_QUANTITY',
   REMOVE_FROM_CART = 'REMOVE_FROM_CART'
+}
+
+export enum ActionType {
+  ADD_TO_CART = 'addToCart',
+  UPDATE_CART_ITEM_QUANTITY = 'updateCartItemQuantity',
+  REMOVE_FROM_CART = 'removeFromCart'
 }
 
 const createState = (service: ProductService): RootState => {
@@ -130,12 +136,29 @@ const getters: StoreOptions<RootState>['getters'] = {
   }
 }
 
+type RootActionContext = ActionContext<RootState, RootState>
+
+const actions: StoreOptions<RootState>['actions'] = {
+  [ActionType.ADD_TO_CART](context: RootActionContext, payload: AddToCartPayload): void {
+    context.commit(MutationType.ADD_TO_CART, payload)
+  },
+  [ActionType.UPDATE_CART_ITEM_QUANTITY](
+    context: RootActionContext,
+    payload: UpdateCartItemQuantityPayload
+  ): void {
+    context.commit(MutationType.UPDATE_CART_ITEM_QUANTITY, payload)
+  },
+  [ActionType.REMOVE_FROM_CART](context: RootActionContext, payload: RemoveFromCartPayload): void {
+    context.commit(MutationType.REMOVE_FROM_CART, payload)
+  }
+}
+
 const createStoreOptions = (service: ProductService): StoreOptions<RootState> => {
   return {
     state: createState(service),
     getters,
     mutations,
-    actions: {},
+    actions,
     modules: {}
   }
 }

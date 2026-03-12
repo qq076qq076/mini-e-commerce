@@ -104,7 +104,7 @@ import AppToast from '@/components/AppToast.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import ProductDetailDialog from '@/components/ProductDetailDialog.vue'
 import { Product } from '@/types/product'
-import { GetterType, MutationType, RootGetters, RootState } from '@/store'
+import { ActionType, GetterType, RootGetters, RootState } from '@/store'
 import {
   AddToCartPayload,
   CartPreviewItem,
@@ -253,20 +253,20 @@ export default Vue.extend({
     addProductToCart(payload: AddToCartPayload): void {
       const productTitle: string = this.getProductTitleById(payload.productId)
 
-      this.$store.commit(MutationType.ADD_TO_CART, payload)
+      this.$store.dispatch(ActionType.ADD_TO_CART, payload)
       this.closeProductDialog()
       this.showToast(`成功將 ${productTitle} 加入購物車`)
     },
     updateCartItemQuantity(payload: UpdateCartItemQuantityPayload): void {
       const productTitle: string = this.getProductTitleById(payload.productId)
 
-      this.$store.commit(MutationType.UPDATE_CART_ITEM_QUANTITY, payload)
+      this.$store.dispatch(ActionType.UPDATE_CART_ITEM_QUANTITY, payload)
       this.showToast(`已更新 ${productTitle} 數量為 ${payload.quantity}`)
     },
     removeCartItem(payload: RemoveFromCartPayload): void {
       const productTitle: string = this.getProductTitleById(payload.productId)
 
-      this.$store.commit(MutationType.REMOVE_FROM_CART, payload)
+      this.$store.dispatch(ActionType.REMOVE_FROM_CART, payload)
       this.showToast(`已從購物車移除 ${productTitle}`)
     },
     formatPrice(price: number): string {
